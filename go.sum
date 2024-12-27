@@ -1,0 +1,8 @@
+github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
+github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+github.com/marco-m/florist v0.3.3 h1:TOUGmyyzeEWwG2xeVHLmUU09mpAoKSYC+PTSlQdsl4k=
+github.com/marco-m/florist v0.3.3/go.mod h1:9LbFXey3TQHxHhVx/vD0pZrsbCRyEJ282jP0uqo9VYQ=
+github.com/marco-m/rosina v0.0.4 h1:3UDsbUbH14oMBeRNNEGr10XGVlOyfLI1fHL5I5DlofU=
+github.com/marco-m/rosina v0.0.4/go.mod h1:XnMWRFIR8GztNE0mRL7b3B+E6r7cL5bpq48TRmtDmjw=
+gotest.tools/v3 v3.5.1 h1:EENdUnS3pdur5nybKYIh2Vfgc8IUNBjxDPSjtiJcOzU=
+gotest.tools/v3 v3.5.1/go.mod h1:isy3WKz7GK6uNw/sbHzfKBLvlvXwUyV06n6brMxxopU=
