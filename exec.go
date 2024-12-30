@@ -8,25 +8,33 @@ import (
 	"strings"
 )
 
-func ExecOut(env []string, name string, arg ...string) (string, error) {
+func ExecOutput(env []string, name string, arg ...string) (string, string, error) {
+	// We don't use cmd.String() because we don't want the full path of 'name'.
+	Out(strings.Join(append([]string{name}, arg...), " "))
 	cmd := exec.Command(name, arg...)
-	Out(cmd.String())
 	cmd.Env = env
-	out, err := cmd.Output()
+	// Output runs the command and returns its standard output. Any returned
+	// error will usually be of type *ExitError. If c.Stderr was nil, Output
+	// populates [ExitError.Stderr].
+	stdout, err := cmd.Output()
+	var stderr []byte
 	if err != nil {
 		var exitError *exec.ExitError
 		if errors.As(err, &exitError) {
-			return "", fmt.Errorf("%s: %w: %s", name, err,
-				strings.TrimSpace(string(exitError.Stderr)))
+			stderr = exitError.Stderr
+			exitError.Stderr = nil
+			return string(stdout), string(stderr),
+				fmt.Errorf("%s: %w", name, err)
 		}
-		return "", fmt.Errorf("%s: %w", name, err)
+		return string(stdout), "", fmt.Errorf("%s: %w", name, err)
 	}
-	return string(out), nil
+	return string(stdout), "", nil
 }
 
 func ExecRun(dir string, env []string, name string, arg ...string) error {
+	// We don't use cmd.String() because we don't want the full path of 'name'.
+	Out(strings.Join(append([]string{name}, arg...), " "))
 	cmd := exec.Command(name, arg...)
-	Out("cmd", cmd.String(), "dir", dir)
 	cmd.Dir = dir
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
