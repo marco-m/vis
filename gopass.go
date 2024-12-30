@@ -141,11 +141,10 @@ func GopassDelete(key string) error {
 	//   gopass delete --force cook/foo
 	//   (yes empty line...)
 	//   Error: Secret "cook/foo" does not exist
-	_, err := ExecOut(nil, "gopass", "delete", "--force", key)
+	_, stderr, err := ExecOutput(nil, "gopass", "delete", "--force", key)
 	if err != nil {
-		msg := err.Error()
-		if strings.Contains(msg, "does not exist") ||
-			strings.Contains(msg, "entry is not in the password store") {
+		if strings.Contains(stderr, "does not exist") ||
+			strings.Contains(stderr, "entry is not in the password store") {
 			return nil
 		}
 		return err
@@ -156,16 +155,16 @@ func GopassDelete(key string) error {
 // GopassGet returns the secret corresponding to key.
 // If key does not exist, it returns [ErrNotFound].
 func GopassGet(key string) (string, error) {
-	out, err := ExecOut(nil, "gopass", "cat", key)
+	stdout, stderr, err := ExecOutput(nil, "gopass", "cat", key)
 	if err != nil {
-		if strings.Contains(err.Error(), "entry is not in the password store") {
+		if strings.Contains(stderr, "entry is not in the password store") {
 			return "", ErrNotFound
 		}
 		return "", err
 	}
 	// Sigh.
 	// return strings.TrimSpace(out), nil
-	return out, nil
+	return stdout, nil
 }
 
 // GopassPut inserts key with associated secret.
@@ -188,11 +187,11 @@ func GopassPut(key string, secret string) error {
 func GopassLs(prefix string) ([]string, error) {
 	var keys []string
 
-	out, err := ExecOut(nil, "gopass", "ls", "--flat", "--strip-prefix", prefix)
+	stdout, stderr, err := ExecOutput(nil, "gopass", "ls", "--flat", "--strip-prefix", prefix)
 	if err != nil {
-		return keys, fmt.Errorf("GopassLs: %s", err)
+		return keys, fmt.Errorf("GopassLs: %s (%s)", err, stderr)
 	}
-	keys = append(keys, strings.Fields(out)...)
+	keys = append(keys, strings.Fields(stdout)...)
 
 	return keys, nil
 }
