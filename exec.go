@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 )
 
-func ExecOutput(env []string, name string, arg ...string) (string, string, error) {
+func ExecOutput(env []string, name string, args ...string) (string, string, error) {
 	// We don't use cmd.String() because we don't want the full path of 'name'.
-	Out(strings.Join(append([]string{name}, arg...), " "))
-	cmd := exec.Command(name, arg...)
+	Out(cmdString(name, args...))
+	cmd := exec.Command(name, args...)
 	cmd.Env = env
 	// Output runs the command and returns its standard output. Any returned
 	// error will usually be of type *ExitError. If c.Stderr was nil, Output
@@ -31,10 +32,10 @@ func ExecOutput(env []string, name string, arg ...string) (string, string, error
 	return string(stdout), "", nil
 }
 
-func ExecRun(dir string, env []string, name string, arg ...string) error {
+func ExecRun(dir string, env []string, name string, args ...string) error {
 	// We don't use cmd.String() because we don't want the full path of 'name'.
-	Out(strings.Join(append([]string{name}, arg...), " "))
-	cmd := exec.Command(name, arg...)
+	Out(cmdString(name, args...))
+	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
@@ -47,11 +48,11 @@ func ExecRun(dir string, env []string, name string, arg ...string) error {
 	return nil
 }
 
-func ExecRunFunc(dir string, env []string, name string, arg1 ...string,
+func ExecRunFunc(dir string, env []string, name string, args1 ...string,
 ) func(arg2 ...string) error {
-	return func(arg2 ...string) error {
-		cmd := exec.Command(name, append(arg1, arg2...)...)
-		Out("cmd", cmd.String(), "dir", dir)
+	return func(args2 ...string) error {
+		Out(cmdString(name, slices.Concat(args1, args2)...))
+		cmd := exec.Command(name, append(args1, args2...)...)
 		cmd.Dir = dir
 		cmd.Env = env
 		cmd.Stdin = os.Stdin
@@ -63,4 +64,19 @@ func ExecRunFunc(dir string, env []string, name string, arg1 ...string,
 		}
 		return nil
 	}
+}
+
+// Return a string that is pastable directly in a shell (that is, with proper
+// quotes when arguments contain spaces).
+func cmdString(name string, args ...string) string {
+	var bld strings.Builder
+	fmt.Fprint(&bld, name)
+	for _, arg := range args {
+		if strings.Contains(arg, " ") {
+			fmt.Fprintf(&bld, " %q", arg)
+		} else {
+			fmt.Fprintf(&bld, " %s", arg)
+		}
+	}
+	return bld.String()
 }
